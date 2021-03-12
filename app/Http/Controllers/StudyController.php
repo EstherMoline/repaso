@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Study;
+use Facade\FlareClient\View;
 use Illuminate\Http\Request;
 
 class StudyController extends Controller
@@ -15,7 +16,7 @@ class StudyController extends Controller
     public function index()
     {
         $studies = Study::all();
-        return $studies;
+        return view('study.index',['studies'=> $studies]);
         // return "lista de estudios";
     }
 
@@ -26,7 +27,7 @@ class StudyController extends Controller
      */
     public function create()
     {
-        return "Aquí formulario de crear estudios";
+        return view('study.create');
     }
 
     /**
@@ -37,7 +38,15 @@ class StudyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules =[
+            'code'=>'required|unique:studies,code|max:6',
+            'name'=>'required|max:100',
+            'abreviation'=>'required|max:4'
+        ];
+
+        $this->validate($request, $rules);
+        $study = Study::create($request->all());
+        return redirect('/studies');
     }
 
     /**
@@ -49,8 +58,8 @@ class StudyController extends Controller
     public function show($id)
     {
         $study = Study::find($id);
-
-        return "Mostrar estudio $study";
+        return view('study.show',['study'=> $study]);
+        // return "lista de estudios";
     }
 
     /**
@@ -61,7 +70,7 @@ class StudyController extends Controller
      */
     public function edit(Study $study)
     {
-        //
+        return view('study.edit',['study'=> $study]);
     }
 
     /**
@@ -73,7 +82,9 @@ class StudyController extends Controller
      */
     public function update(Request $request, Study $study)
     {
-        //
+        $study->fill($request->all());
+        $study->save();
+        return redirect('/studies');
     }
 
     /**
@@ -84,6 +95,8 @@ class StudyController extends Controller
      */
     public function destroy(Study $study)
     {
-        //
+        $study->delete();
+        //Study::destroy($id);
+        return back();
     }
 }
